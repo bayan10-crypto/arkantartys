@@ -1,0 +1,779 @@
+<!doctype html>
+<html lang="kk">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>Арқан тартыс ойыны — Қасиет ↔ Кристалдық тор</title>
+  <style>
+    :root{
+      --bg1:#071321;
+      --bg2:#071a2e;
+      --card:rgba(255,255,255,.06);
+      --line:rgba(255,255,255,.14);
+      --text:#eaf4ff;
+      --muted:#a9c3de;
+      --accent:#45d6ff;
+      --accent2:#7bffb2;
+      --good:#2ef7a1;
+      --bad:#ff4d6d;
+      --warn:#ffd166;
+      --shadow:0 14px 40px rgba(0,0,0,.35);
+      --r:18px;
+      --mono: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono","Courier New", monospace;
+      --sans: ui-sans-serif, system-ui, -apple-system, Segoe UI, Roboto, Helvetica, Arial;
+    }
+    *{box-sizing:border-box}
+    body{
+      margin:0;
+      font-family:var(--sans);
+      color:var(--text);
+      background:
+        radial-gradient(1000px 600px at 18% 12%, rgba(69,214,255,.16), transparent 55%),
+        radial-gradient(900px 600px at 82% 20%, rgba(123,255,178,.12), transparent 55%),
+        radial-gradient(900px 600px at 55% 95%, rgba(255,209,102,.08), transparent 55%),
+        linear-gradient(180deg, var(--bg1), var(--bg2));
+      min-height:100vh;
+      overflow-x:hidden;
+    }
+
+    /* subtle chemistry grid */
+    .chem-bg{
+      position:fixed; inset:0; pointer-events:none;
+      background-image:
+        linear-gradient(90deg, rgba(255,255,255,.045) 1px, transparent 1px),
+        linear-gradient(0deg, rgba(255,255,255,.045) 1px, transparent 1px);
+      background-size: 120px 120px;
+      opacity:.35;
+    }
+
+    header{
+      position:sticky; top:0; z-index:10;
+      backdrop-filter: blur(10px);
+      background: rgba(7,19,33,.58);
+      border-bottom:1px solid var(--line);
+    }
+    .wrap{max-width:1200px;margin:0 auto;padding:16px}
+    .top{
+      display:flex; align-items:center; justify-content:space-between; gap:12px; flex-wrap:wrap;
+    }
+    .brand{display:flex; align-items:center; gap:12px}
+    .logo{
+      width:44px;height:44px;border-radius:14px;
+      background:
+        radial-gradient(circle at 35% 35%, rgba(69,214,255,.85), rgba(69,214,255,.18) 55%, transparent 60%),
+        radial-gradient(circle at 70% 65%, rgba(123,255,178,.70), rgba(123,255,178,.14) 55%, transparent 62%),
+        linear-gradient(135deg, rgba(255,255,255,.14), rgba(255,255,255,0));
+      border:1px solid rgba(255,255,255,.18);
+      box-shadow: var(--shadow);
+    }
+    h1{margin:0;font-size:16px;letter-spacing:.2px}
+    .sub{margin:2px 0 0;color:var(--muted);font-size:12px}
+
+    .hud{
+      display:flex; align-items:center; gap:10px; flex-wrap:wrap; justify-content:flex-end;
+      font-size:12px;
+    }
+    .pill{
+      border:1px solid rgba(255,255,255,.14);
+      background: rgba(0,0,0,.14);
+      border-radius:999px;
+      padding:8px 10px;
+      box-shadow: 0 8px 18px rgba(0,0,0,.18);
+      display:flex; gap:8px; align-items:center;
+      font-family:var(--mono);
+    }
+    .btn{
+      appearance:none;
+      border:1px solid rgba(255,255,255,.16);
+      background: rgba(0,0,0,.18);
+      color:var(--text);
+      padding:10px 12px;
+      border-radius:12px;
+      cursor:pointer;
+      transition: transform .12s ease, border-color .12s ease;
+      font-size:13px;
+    }
+    .btn:hover{transform: translateY(-1px); border-color: rgba(69,214,255,.45);}
+    .btn.primary{
+      background: linear-gradient(135deg, rgba(69,214,255,.22), rgba(123,255,178,.12));
+      border-color: rgba(69,214,255,.55);
+    }
+    .btn.danger{
+      background: rgba(255,77,109,.14);
+      border-color: rgba(255,77,109,.45);
+    }
+
+    main{padding:16px 0 36px}
+
+    .card{
+      background: linear-gradient(180deg, rgba(255,255,255,.065), rgba(255,255,255,.045));
+      border:1px solid rgba(255,255,255,.14);
+      border-radius: var(--r);
+      box-shadow: var(--shadow);
+      padding:16px;
+      overflow:hidden;
+      position:relative;
+    }
+    .card:before{
+      content:"";
+      position:absolute; right:-90px; top:-90px;
+      width:220px; height:220px;
+      background: radial-gradient(circle, rgba(69,214,255,.18), transparent 60%);
+    }
+
+    /* Top illustration */
+    .hero{
+      display:grid;
+      gap:14px;
+      grid-template-columns: 1fr;
+      align-items:center;
+    }
+    .tug-svg{
+      width:100%;
+      height:auto;
+      border-radius:16px;
+      border:1px solid rgba(255,255,255,.14);
+      background: rgba(0,0,0,.10);
+      overflow:hidden;
+      display:block;
+    }
+
+    /* Rope meter */
+    .ropeMeter{
+      position:relative;
+      border:1px solid rgba(255,255,255,.14);
+      background: rgba(0,0,0,.12);
+      border-radius:16px;
+      padding:14px 14px 18px;
+    }
+    .meterRow{
+      display:flex; align-items:center; justify-content:space-between; gap:10px;
+      font-size:12px; color:var(--muted);
+      margin-bottom:10px;
+      flex-wrap:wrap;
+    }
+    .meterRow b{color:var(--text)}
+    .bar{
+      position:relative;
+      height:18px;
+      border-radius:999px;
+      background:
+        linear-gradient(90deg, rgba(69,214,255,.18), rgba(255,255,255,.06) 50%, rgba(123,255,178,.14));
+      border:1px solid rgba(255,255,255,.14);
+      overflow:hidden;
+    }
+    .ropeTexture{
+      position:absolute; inset:0;
+      background:
+        repeating-linear-gradient(135deg, rgba(255,209,102,.55) 0 8px, rgba(255,255,255,.10) 8px 16px);
+      opacity:.35;
+      mix-blend-mode:screen;
+    }
+    .centerLine{
+      position:absolute; left:50%; top:-6px; bottom:-6px;
+      width:2px; background: rgba(255,255,255,.22);
+    }
+    .marker{
+      position:absolute;
+      top:50%;
+      transform: translate(-50%,-50%);
+      width:34px; height:34px;
+      border-radius:12px;
+      border:1px solid rgba(255,255,255,.18);
+      background: radial-gradient(circle at 35% 35%, rgba(255,255,255,.18), rgba(0,0,0,.22));
+      display:grid; place-items:center;
+      box-shadow: 0 10px 22px rgba(0,0,0,.25);
+      transition: left .25s ease;
+    }
+    .flag{
+      width:18px; height:18px;
+      border-left:3px solid rgba(255,255,255,.75);
+      position:relative;
+    }
+    .flag:before{
+      content:"";
+      position:absolute;
+      left:3px; top:1px;
+      width:12px; height:8px;
+      background: linear-gradient(135deg, rgba(69,214,255,.85), rgba(123,255,178,.65));
+      border-radius:2px;
+      border:1px solid rgba(255,255,255,.25);
+    }
+
+    .status{
+      margin-top:10px;
+      padding:12px;
+      border-radius:14px;
+      border:1px solid rgba(255,255,255,.14);
+      background: rgba(0,0,0,.14);
+      font-size:13px;
+    }
+    .ok{color:var(--good); font-weight:700}
+    .bad{color:var(--bad); font-weight:700}
+    .warn{color:var(--warn); font-weight:700}
+    .muted{color:var(--muted)}
+
+    /* columns */
+    .cols{
+      display:grid;
+      gap:16px;
+      grid-template-columns: 1fr;
+      margin-top:16px;
+    }
+    @media (min-width: 980px){
+      .cols{grid-template-columns: 1fr 1fr;}
+    }
+    .teamTitle{
+      display:flex; align-items:center; justify-content:space-between; gap:10px;
+      margin-bottom:10px;
+    }
+    .teamName{
+      font-size:15px; margin:0; letter-spacing:.2px;
+    }
+    .tag{
+      font-family:var(--mono);
+      font-size:12px;
+      padding:6px 10px;
+      border-radius:999px;
+      border:1px solid rgba(255,255,255,.14);
+      background: rgba(0,0,0,.14);
+      color: rgba(232,242,255,.95);
+    }
+
+    .q{
+      padding:12px;
+      border-radius:14px;
+      border:1px solid rgba(255,255,255,.14);
+      background: rgba(0,0,0,.12);
+      margin-bottom:10px;
+    }
+    .qhead{
+      display:flex; gap:10px; align-items:flex-start; justify-content:space-between;
+      margin-bottom:8px;
+    }
+    .qnum{
+      font-family:var(--mono);
+      font-size:12px;
+      padding:4px 8px;
+      border-radius:10px;
+      border:1px solid rgba(255,255,255,.14);
+      background: rgba(69,214,255,.10);
+      white-space:nowrap;
+      flex:0 0 auto;
+    }
+    .qtext{font-size:13px; margin:0; color:var(--text); line-height:1.35}
+    .opt{
+      display:flex; gap:10px; align-items:flex-start;
+      padding:8px 10px;
+      border-radius:12px;
+      border:1px solid rgba(255,255,255,.10);
+      background: rgba(255,255,255,.04);
+      margin:8px 0;
+      cursor:pointer;
+      user-select:none;
+    }
+    .opt input{margin-top:2px}
+    .qfoot{
+      display:flex; gap:10px; align-items:center; justify-content:space-between; flex-wrap:wrap;
+      margin-top:10px;
+    }
+    .small{font-size:12px; color:var(--muted);}
+    .lock{
+      font-family:var(--mono);
+      font-size:12px;
+      padding:6px 10px;
+      border-radius:999px;
+      border:1px solid rgba(255,255,255,.14);
+      background: rgba(46,247,161,.08);
+      color: rgba(232,242,255,.95);
+      display:none;
+    }
+    .lock.show{display:inline-flex}
+    .footer{
+      margin-top:16px;
+      color:var(--muted);
+      font-size:12px;
+      text-align:center;
+    }
+  </style>
+</head>
+<body>
+  <div class="chem-bg" aria-hidden="true"></div>
+
+  <header>
+    <div class="wrap">
+      <div class="top">
+        <div class="brand">
+          <div class="logo" aria-hidden="true"></div>
+          <div>
+            <h1>Арқан тартыс ойыны: «Зат қасиеті ↔ кристалдық тор»</h1>
+            <div class="sub">Екі топ • әр топқа 7 сұрақ • дұрыс жауап = арқан сол жаққа/оң жаққа тартылады</div>
+          </div>
+        </div>
+
+        <div class="hud">
+          <div class="pill">⏱️ <span id="time">00:00</span></div>
+          <button class="btn primary" id="startBtn">Бастау</button>
+          <button class="btn danger" id="resetBtn">Қайта бастау</button>
+        </div>
+      </div>
+    </div>
+  </header>
+
+  <main class="wrap">
+
+    <div class="card hero">
+      <!-- Inline SVG illustration (әрқашан көрінеді, интернетсіз) -->
+      <svg class="tug-svg" viewBox="0 0 1200 260" role="img" aria-label="Арқан тартыс иллюстрациясы">
+        <defs>
+          <linearGradient id="g1" x1="0" x2="1">
+            <stop offset="0" stop-color="rgba(69,214,255,.35)"/>
+            <stop offset="1" stop-color="rgba(123,255,178,.25)"/>
+          </linearGradient>
+          <linearGradient id="rope" x1="0" x2="1">
+            <stop offset="0" stop-color="rgba(255,209,102,.85)"/>
+            <stop offset="1" stop-color="rgba(255,209,102,.55)"/>
+          </linearGradient>
+        </defs>
+        <rect x="0" y="0" width="1200" height="260" fill="rgba(0,0,0,.10)"/>
+        <!-- chemistry dots -->
+        <g opacity=".55">
+          <circle cx="110" cy="60" r="10" fill="rgba(69,214,255,.35)"/>
+          <circle cx="160" cy="95" r="7" fill="rgba(123,255,178,.25)"/>
+          <circle cx="220" cy="55" r="8" fill="rgba(255,209,102,.20)"/>
+          <line x1="110" y1="60" x2="160" y2="95" stroke="rgba(234,244,255,.20)" stroke-width="2"/>
+          <line x1="160" y1="95" x2="220" y2="55" stroke="rgba(234,244,255,.20)" stroke-width="2"/>
+        </g>
+        <g opacity=".45">
+          <circle cx="1040" cy="70" r="10" fill="rgba(69,214,255,.25)"/>
+          <circle cx="990" cy="110" r="7" fill="rgba(123,255,178,.22)"/>
+          <circle cx="930" cy="65" r="8" fill="rgba(255,209,102,.18)"/>
+          <line x1="1040" y1="70" x2="990" y2="110" stroke="rgba(234,244,255,.18)" stroke-width="2"/>
+          <line x1="990" y1="110" x2="930" y2="65" stroke="rgba(234,244,255,.18)" stroke-width="2"/>
+        </g>
+
+        <!-- rope -->
+        <path d="M140 140 C 360 110, 840 170, 1060 140" fill="none" stroke="url(#rope)" stroke-width="12" stroke-linecap="round"/>
+        <path d="M140 148 C 360 118, 840 178, 1060 148" fill="none" stroke="rgba(255,255,255,.12)" stroke-width="2"/>
+
+        <!-- center flag -->
+        <g transform="translate(595,90)">
+          <rect x="0" y="0" width="6" height="70" fill="rgba(234,244,255,.65)"/>
+          <path d="M6 6 L44 18 L6 32 Z" fill="url(#g1)" stroke="rgba(234,244,255,.35)" stroke-width="1"/>
+        </g>
+
+        <!-- left team (simple figures) -->
+        <g transform="translate(170,160)">
+          <g fill="rgba(69,214,255,.55)" stroke="rgba(234,244,255,.22)" stroke-width="2">
+            <circle cx="0" cy="-40" r="16"/><rect x="-18" y="-24" width="36" height="54" rx="14"/>
+            <circle cx="70" cy="-36" r="16"/><rect x="52" y="-20" width="36" height="50" rx="14"/>
+            <circle cx="140" cy="-38" r="16"/><rect x="122" y="-22" width="36" height="52" rx="14"/>
+          </g>
+        </g>
+
+        <!-- right team -->
+        <g transform="translate(860,160)">
+          <g fill="rgba(123,255,178,.45)" stroke="rgba(234,244,255,.22)" stroke-width="2">
+            <circle cx="0" cy="-40" r="16"/><rect x="-18" y="-24" width="36" height="54" rx="14"/>
+            <circle cx="70" cy="-36" r="16"/><rect x="52" y="-20" width="36" height="50" rx="14"/>
+            <circle cx="140" cy="-38" r="16"/><rect x="122" y="-22" width="36" height="52" rx="14"/>
+          </g>
+        </g>
+      </svg>
+
+      <div class="ropeMeter">
+        <div class="meterRow">
+          <div>🔵 Сол жақ (A): <b id="scoreA">0</b> ұпай • <b id="doneA">0</b>/7</div>
+          <div>🟢 Оң жақ (B): <b id="scoreB">0</b> ұпай • <b id="doneB">0</b>/7</div>
+        </div>
+
+        <div class="bar" aria-label="Арқан индикаторы">
+          <div class="ropeTexture" aria-hidden="true"></div>
+          <div class="centerLine" aria-hidden="true"></div>
+          <div class="marker" id="marker" style="left:50%">
+            <div class="flag" aria-hidden="true"></div>
+          </div>
+        </div>
+
+        <div class="status" id="status" aria-live="polite">
+          <span class="warn">Ереже:</span> Әр топ өз бағанындағы 7 сұраққа жауап береді.
+          Әр <b>дұрыс жауап</b> — арқан сол топ жаққа бір қадам тартылады.
+          <br><span class="muted">Алдымен “Бастау” басыңыз.</span>
+        </div>
+      </div>
+    </div>
+
+    <div class="cols">
+      <div class="card" id="teamA">
+        <div class="teamTitle">
+          <h2 class="teamName">🔵 TEAM A (Сол жақ)</h2>
+          <span class="tag">Properties ↔ Lattice</span>
+        </div>
+        <div id="qaA"></div>
+      </div>
+
+      <div class="card" id="teamB">
+        <div class="teamTitle">
+          <h2 class="teamName">🟢 TEAM B (Оң жақ)</h2>
+          <span class="tag">Properties ↔ Lattice</span>
+        </div>
+        <div id="qaB"></div>
+      </div>
+    </div>
+
+    <div class="footer">Кеңес: әр сұрақта жауапты таңдап, “Тексеру” басыңыз — ұпай бірден есептеледі.</div>
+  </main>
+
+<script>
+/* =======================
+   СҰРАҚТАР: Қасиет ↔ Тор
+   Түрлері: mcq (бір жауап), tf (шын/жалған)
+   ======================= */
+
+const teamAQuestions = [
+  { type:"mcq",
+    q:"Қатты күйде ток өткізбейді, бірақ балқығанда/ерітіндіде ток өткізеді. Бұл қасиет көбіне қай торға тән?",
+    options:["Металдық","Иондық","Молекулалық","Атомдық (ковалентті)"],
+    a:1
+  },
+  { type:"tf",
+    q:"Металдардың созылғыш, иілімді болуы металдық байланыспен түсіндіріледі.",
+    options:["Шындық","Жалған"],
+    a:0
+  },
+  { type:"mcq",
+    q:"Төмен балқу және ұшқыштық (сублимация) жиі байқалса, ең ықтимал тор түрі:",
+    options:["Молекулалық","Иондық","Металдық","Атомдық (ковалентті)"],
+    a:0
+  },
+  { type:"mcq",
+    q:"Иондық кристалдардың морт сынғыштығының дұрыс себебі:",
+    options:[
+      "Қабаттар ығысқанда бірдей зарядтар жақындап тебіледі",
+      "Еркін электрондар толығымен жоғалады",
+      "Молекулалар еркін қозғалады",
+      "Сутектік байланыс күшейеді"
+    ],
+    a:0
+  },
+  { type:"tf",
+    q:"Атомдық (ковалентті) торда байланыс бүкіл кристалл бойынша таралғандықтан қаттылық әдетте жоғары болады.",
+    options:["Шындық","Жалған"],
+    a:0
+  },
+  { type:"mcq",
+    q:"Қатты күйде жақсы электр және жылу өткізгіштік — ең тән белгі:",
+    options:["Иондық тор","Металдық тор","Молекулалық тор","Атомдық тор"],
+    a:1
+  },
+  { type:"mcq",
+    q:"Суда жақсы еру + ерітіндісі ток өткізу + балқуы жоғары — бұл сипаттама көбіне:",
+    options:["Иондық торға","Молекулалық торға","Металдық торға","Атомдық торға"],
+    a:0
+  }
+];
+
+const teamBQuestions = [
+  { type:"mcq",
+    q:"Тор түйіндерінде молекулалар орналасып, олардың арасында әлсіз тартылыс күштері болса — бұл:",
+    options:["Иондық","Металдық","Молекулалық","Атомдық (ковалентті)"],
+    a:2
+  },
+  { type:"tf",
+    q:"Иондық заттар қатты күйінде әрдайым ток өткізеді.",
+    options:["Шындық","Жалған"],
+    a:1
+  },
+  { type:"mcq",
+    q:"Өте жоғары балқу температурасы мен аса қаттылық көбіне нені көрсетеді?",
+    options:[
+      "Әлсіз ван-дер-Ваальс күштері",
+      "Ковалентті торлық байланыстардың беріктігі",
+      "Тек түс/иіс қасиеті",
+      "Молекулалардың ұшқыштығы"
+    ],
+    a:1
+  },
+  { type:"mcq",
+    q:"Металдық тордағы электрөткізгіштіктің негізгі себебі:",
+    options:["Иондардың қозғалысы","Еркін электрондардың болуы","Молекулалардың полярлығы","Сутектік байланыс"],
+    a:1
+  },
+  { type:"tf",
+    q:"Қасиеттерді болжау үшін ең маңыздысы: түйіндегі бөлшек түрі және байланыс сипаты.",
+    options:["Шындық","Жалған"],
+    a:0
+  },
+  { type:"mcq",
+    q:"Қайсысында «қасиет → тор» сәйкестігі дұрыс?",
+    options:[
+      "Төмен балқу → молекулалық тор",
+      "Қатты күйде ток өткізу → иондық тор",
+      "Ұшқыштық → металдық тор",
+      "Жоғары ерігіштік міндетті түрде → атомдық тор"
+    ],
+    a:0
+  },
+  { type:"mcq",
+    q:"Қатты күйде ток өткізбейтін, ерімейтін, бірақ өте қатты зат (мысалы, алмаз) — ең ықтимал тор:",
+    options:["Молекулалық","Иондық","Металдық","Атомдық (ковалентті)"],
+    a:3
+  }
+];
+
+/* =======================
+   ОЙЫН ЛОГИКАСЫ
+   ======================= */
+const state = {
+  started:false,
+  startTime:null,
+  timerId:null,
+  scoreA:0, scoreB:0,
+  doneA:0, doneB:0,
+  lockedA:Array(teamAQuestions.length).fill(false),
+  lockedB:Array(teamBQuestions.length).fill(false),
+  finishA:null, finishB:null
+};
+
+const el = {
+  qaA: document.getElementById("qaA"),
+  qaB: document.getElementById("qaB"),
+  scoreA: document.getElementById("scoreA"),
+  scoreB: document.getElementById("scoreB"),
+  doneA: document.getElementById("doneA"),
+  doneB: document.getElementById("doneB"),
+  marker: document.getElementById("marker"),
+  status: document.getElementById("status"),
+  time: document.getElementById("time"),
+  startBtn: document.getElementById("startBtn"),
+  resetBtn: document.getElementById("resetBtn"),
+};
+
+const STEP = 6;     // әр дұрыс жауап айырмасына қарай % жылжу
+const MIN_POS = 10; // шектік
+const MAX_POS = 90;
+
+function clamp(n,a,b){ return Math.max(a, Math.min(b,n)); }
+
+function formatTime(ms){
+  const sec = Math.floor(ms/1000);
+  const m = String(Math.floor(sec/60)).padStart(2,"0");
+  const s = String(sec%60).padStart(2,"0");
+  return `${m}:${s}`;
+}
+
+function tick(){
+  const ms = Date.now() - state.startTime;
+  el.time.textContent = formatTime(ms);
+}
+
+function updateHUD(){
+  el.scoreA.textContent = state.scoreA;
+  el.scoreB.textContent = state.scoreB;
+  el.doneA.textContent = state.doneA;
+  el.doneB.textContent = state.doneB;
+
+  const diff = state.scoreA - state.scoreB;
+  const pos = clamp(50 + diff*STEP, MIN_POS, MAX_POS);
+  el.marker.style.left = pos + "%";
+
+  const totalA = teamAQuestions.length, totalB = teamBQuestions.length;
+  const allDone = (state.doneA===totalA) && (state.doneB===totalB);
+
+  if(!state.started){
+    el.status.innerHTML =
+      `<span class="warn">Ереже:</span> Әр топ өз сұрақтарына жауап береді. `+
+      `Дұрыс жауап = арқан сол топқа тартылады.<br><span class="muted">Ойынды бастау үшін “Бастау” басыңыз.</span>`;
+    return;
+  }
+
+  let msg = `Ойын жүріп жатыр… Дұрыс жауаптар: <b>TEAM A</b> = ${state.scoreA}, <b>TEAM B</b> = ${state.scoreB}.`;
+  if(!allDone){
+    msg += ` <span class="muted">Екі топ та 7 сұрақтың бәрін аяқтасын.</span>`;
+  }
+
+  if(allDone){
+    const tNow = Date.now();
+    const timeA = state.finishA ?? tNow;
+    const timeB = state.finishB ?? tNow;
+
+    if(state.scoreA > state.scoreB){
+      msg = `<span class="ok">TEAM A жеңді!</span> Ұпай: ${state.scoreA} — ${state.scoreB}.`;
+    }else if(state.scoreB > state.scoreA){
+      msg = `<span class="ok">TEAM B жеңді!</span> Ұпай: ${state.scoreB} — ${state.scoreA}.`;
+    }else{
+      if(timeA < timeB){
+        msg = `<span class="ok">Ұпай тең!</span> Бірақ <span class="ok">TEAM A</span> жылдамырақ аяқтады ⏱️`;
+      }else if(timeB < timeA){
+        msg = `<span class="ok">Ұпай тең!</span> Бірақ <span class="ok">TEAM B</span> жылдамырақ аяқтады ⏱️`;
+      }else{
+        msg = `<span class="ok">Ұпай да, уақыт та тең!</span> Қайта ойнауға болады 🙂`;
+      }
+    }
+    msg += ` <span class="muted">(Уақыт: ${el.time.textContent})</span>`;
+    if(state.timerId){ clearInterval(state.timerId); state.timerId=null; }
+  }
+
+  el.status.innerHTML = msg;
+}
+
+function buildQuestions(container, teamKey, questions){
+  container.innerHTML = "";
+  questions.forEach((item, idx)=>{
+    const qId = `${teamKey}-q${idx}`;
+    const opts = item.options;
+
+    const wrap = document.createElement("div");
+    wrap.className = "q";
+    wrap.innerHTML = `
+      <div class="qhead">
+        <div class="qnum">${idx+1}</div>
+        <p class="qtext">${item.q}</p>
+      </div>
+
+      <div class="opts">
+        ${opts.map((opt, oi)=>`
+          <label class="opt">
+            <input type="radio" name="${qId}" value="${oi}">
+            <span>${opt}</span>
+          </label>
+        `).join("")}
+      </div>
+
+      <div class="qfoot">
+        <button class="btn primary" data-action="check" data-team="${teamKey}" data-idx="${idx}">Тексеру</button>
+        <span class="lock" data-lock="${qId}">✅ Бекітілді</span>
+        <span class="small" data-msg="${qId}">Бір жауапты таңдаңыз.</span>
+      </div>
+    `;
+    container.appendChild(wrap);
+  });
+}
+
+function lockQuestion(teamKey, idx){
+  const qId = `${teamKey}-q${idx}`;
+  document.querySelectorAll(`input[name="${qId}"]`).forEach(inp => inp.disabled = true);
+  const btn = document.querySelector(`button[data-team="${teamKey}"][data-idx="${idx}"]`);
+  if(btn) btn.disabled = true;
+  const lock = document.querySelector(`[data-lock="${qId}"]`);
+  if(lock) lock.classList.add("show");
+}
+
+function markOptions(teamKey, idx, correctIndex, chosenIndex){
+  const qId = `${teamKey}-q${idx}`;
+  const labels = Array.from(document.querySelectorAll(`input[name="${qId}"]`)).map(i => i.closest(".opt"));
+
+  labels.forEach(l=>{
+    l.style.borderColor = "rgba(255,255,255,.10)";
+    l.style.background = "rgba(255,255,255,.04)";
+  });
+
+  if(labels[correctIndex]){
+    labels[correctIndex].style.borderColor = "rgba(46,247,161,.55)";
+    labels[correctIndex].style.background = "rgba(46,247,161,.10)";
+  }
+  if(chosenIndex != null && chosenIndex !== correctIndex && labels[chosenIndex]){
+    labels[chosenIndex].style.borderColor = "rgba(255,77,109,.55)";
+    labels[chosenIndex].style.background = "rgba(255,77,109,.10)";
+  }
+}
+
+function setMsg(teamKey, idx, html){
+  const qId = `${teamKey}-q${idx}`;
+  const msg = document.querySelector(`[data-msg="${qId}"]`);
+  if(msg) msg.innerHTML = html;
+}
+
+function handleCheck(teamKey, idx){
+  if(!state.started){
+    el.status.innerHTML = `<span class="warn">Алдымен “Бастау” басыңыз.</span>`;
+    return;
+  }
+  const isA = teamKey === "A";
+  const locked = isA ? state.lockedA[idx] : state.lockedB[idx];
+  if(locked) return;
+
+  const qId = `${teamKey}-q${idx}`;
+  const sel = document.querySelector(`input[name="${qId}"]:checked`);
+  if(!sel){
+    setMsg(teamKey, idx, `<span class="warn">Жауап таңдалмаған.</span>`);
+    return;
+  }
+
+  const chosen = Number(sel.value);
+  const q = isA ? teamAQuestions[idx] : teamBQuestions[idx];
+  const correct = q.a;
+  const ok = chosen === correct;
+
+  markOptions(teamKey, idx, correct, chosen);
+
+  if(isA){
+    state.lockedA[idx] = true;
+    state.doneA += 1;
+    if(state.doneA === teamAQuestions.length && state.finishA == null) state.finishA = Date.now();
+    if(ok) state.scoreA += 1;
+  } else {
+    state.lockedB[idx] = true;
+    state.doneB += 1;
+    if(state.doneB === teamBQuestions.length && state.finishB == null) state.finishB = Date.now();
+    if(ok) state.scoreB += 1;
+  }
+
+  lockQuestion(teamKey, idx);
+
+  setMsg(teamKey, idx, ok
+    ? `<span class="ok">Дұрыс ✅</span> (+1 ұпай)`
+    : `<span class="bad">Қате ❌</span> (Дұрыс жауап белгіленді)`
+  );
+
+  updateHUD();
+}
+
+/* =======================
+   Бастау / Қайта бастау
+   ======================= */
+function startGame(){
+  if(state.started) return;
+  state.started = true;
+  state.startTime = Date.now();
+  el.time.textContent = "00:00";
+  state.timerId = setInterval(tick, 250);
+  updateHUD();
+}
+
+function resetGame(){
+  if(state.timerId){ clearInterval(state.timerId); state.timerId = null; }
+
+  state.started=false;
+  state.startTime=null;
+  state.scoreA=0; state.scoreB=0;
+  state.doneA=0; state.doneB=0;
+  state.finishA=null; state.finishB=null;
+  state.lockedA = Array(teamAQuestions.length).fill(false);
+  state.lockedB = Array(teamBQuestions.length).fill(false);
+
+  buildQuestions(el.qaA, "A", teamAQuestions);
+  buildQuestions(el.qaB, "B", teamBQuestions);
+
+  el.marker.style.left = "50%";
+  el.time.textContent = "00:00";
+  updateHUD();
+}
+
+/* =======================
+   Event listeners
+   ======================= */
+document.addEventListener("click", (e)=>{
+  const btn = e.target.closest('button[data-action="check"]');
+  if(!btn) return;
+  handleCheck(btn.dataset.team, Number(btn.dataset.idx));
+});
+
+el.startBtn.addEventListener("click", startGame);
+el.resetBtn.addEventListener("click", resetGame);
+
+/* init */
+resetGame();
+</script>
+</body>
+</html>
